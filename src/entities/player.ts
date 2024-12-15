@@ -1,4 +1,3 @@
-import { SPRITES } from "../utils/constants";
 import { InputController } from "../utils/input.controller";
 import { Entity } from "./entity";
 
@@ -17,7 +16,7 @@ export class Player extends Entity {
     moveSpeed: number = 0.5,
     scale: number = 0.8
   ) {
-    super(scene, x, y, texture, SPRITES.PLAYER);
+    super(scene, x, y, texture);
 
     const anims = this.scene.anims;
     const animsFrameRate = 9;

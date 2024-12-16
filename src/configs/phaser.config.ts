@@ -15,7 +15,7 @@ export const phaserConfig = {
     default: "matter",
     matter: {
       gravity: { x: 0, y: 0 },
-      debug: true,
+      debug: false,
     },
   },
   pixelArt: true,

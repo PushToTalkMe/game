@@ -12,10 +12,11 @@ import {
 } from "../utils/constants";
 import fallingRocksJSON from "../assets/falling-rocks.json";
 import { SETTINGS } from "../utils/settings";
+import { Rock } from "../entities/rock";
 
 export class FallingRocksScene extends Phaser.Scene {
   private player?: Player;
-  private rocks: Phaser.Physics.Matter.Sprite[] = [];
+  private rocks: Rock[] = [];
   private timer: number = SETTINGS.FALLING_ROCKS.TIMER;
   private lives: number = SETTINGS.FALLING_ROCKS.LIVES;
   private gameOver: "win" | "loss" | "";
@@ -141,23 +142,19 @@ export class FallingRocksScene extends Phaser.Scene {
   }
 
   spawnRock() {
-    const rock = this.matter.add
-      .sprite(
-        Phaser.Math.Between(0, this.cameras.main.width),
-        SETTINGS.FALLING_ROCKS.ROCK.COORDINATES.Y,
-        TILES.ROCK
+    const rock = new Rock(
+      this,
+      Phaser.Math.Between(0, this.cameras.main.width),
+      SETTINGS.FALLING_ROCKS.ROCK.COORDINATES.Y,
+      TILES.ROCK,
+      SETTINGS.FALLING_ROCKS.ROCK.SCALE,
+      SETTINGS.FALLING_ROCKS.ROCK.BODY,
+      SETTINGS.FALLING_ROCKS.ROCK.FRICTION_AIR,
+      Phaser.Math.Between(
+        SETTINGS.FALLING_ROCKS.ROCK.MIN_VELOCITY_Y,
+        SETTINGS.FALLING_ROCKS.ROCK.MAX_VELOCITY_Y
       )
-      .setScale(SETTINGS.FALLING_ROCKS.ROCK.SCALE)
-      .setBody(SETTINGS.FALLING_ROCKS.ROCK.BODY)
-      .setFixedRotation()
-      .setFrictionAir(SETTINGS.FALLING_ROCKS.ROCK.FRICTION_AIR)
-      .setVelocityY(
-        Phaser.Math.Between(
-          SETTINGS.FALLING_ROCKS.ROCK.MIN_VELOCITY_Y,
-          SETTINGS.FALLING_ROCKS.ROCK.MAX_VELOCITY_Y
-        )
-      )
-      .setCollidesWith([]);
+    );
 
     this.rocks.push(rock);
 

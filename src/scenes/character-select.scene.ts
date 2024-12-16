@@ -1,9 +1,9 @@
-import { CHARACTERS, PATH_ASSETS } from "../utils/constants";
+import { CHARACTERS, KEYS, PATH_ASSETS, STYLE, TEXT } from "../utils/constants";
 
 export class CharacterSelectScene extends Phaser.Scene {
-  selectedCharacter: string;
+  private selectedCharacter: string;
   constructor() {
-    super("CharacterSelectScene");
+    super(KEYS.SCENES.CHARACTER_SELECT);
   }
 
   preload() {
@@ -22,12 +22,12 @@ export class CharacterSelectScene extends Phaser.Scene {
     character.setInteractive();
 
     character.on("pointerover", () => {
-      this.input.setDefaultCursor("pointer");
+      this.input.setDefaultCursor(STYLE.CURSOR.POINTER);
       character.setScale(0.31);
     });
 
     character.on("pointerout", () => {
-      this.input.setDefaultCursor("default");
+      this.input.setDefaultCursor(STYLE.CURSOR.DEFAULT);
       character.setScale(0.3);
     });
 
@@ -43,45 +43,45 @@ export class CharacterSelectScene extends Phaser.Scene {
 
     button.on("pointerover", () => {
       if (this.selectedCharacter) {
-        button.setStyle({ backgroundColor: "#0056b3" });
-        this.input.setDefaultCursor("pointer");
+        button.setStyle({ backgroundColor: STYLE.COLOR.DARK_BLUE });
+        this.input.setDefaultCursor(STYLE.CURSOR.POINTER);
       } else {
-        this.input.setDefaultCursor("default");
+        this.input.setDefaultCursor(STYLE.CURSOR.DEFAULT);
       }
     });
 
     button.on("pointerout", () => {
-      button.setStyle({ backgroundColor: "#007BFF" });
-      this.input.setDefaultCursor("default");
+      button.setStyle({ backgroundColor: STYLE.COLOR.BLUE });
+      this.input.setDefaultCursor(STYLE.CURSOR.DEFAULT);
     });
 
     button.on("pointerdown", () => {
       if (this.selectedCharacter) {
         this.registry.set("character", this.selectedCharacter);
-        this.input.setDefaultCursor("default");
-        this.scene.start("MainScene");
+        this.input.setDefaultCursor(STYLE.CURSOR.DEFAULT);
+        this.scene.start(KEYS.SCENES.MAIN);
       }
     });
   }
 
   create() {
     this.selectedCharacter = null;
-    this.cameras.main.setBackgroundColor("#c6c2ba");
+    this.cameras.main.setBackgroundColor(STYLE.COLOR.GREEN_GRAY);
 
     const button = this.add
-      .text(400, 450, "Играть", {
-        fontSize: "32px",
-        color: "#ffffff",
-        backgroundColor: "#007BFF",
-        padding: { x: 10, y: 5 },
-        align: "center",
+      .text(400, 450, TEXT.PLAY, {
+        fontSize: STYLE.FONT_SIZE[32],
+        color: STYLE.COLOR.WHITE,
+        backgroundColor: STYLE.COLOR.BLUE,
+        padding: STYLE.PADDING,
+        align: STYLE.ALIGN.CENTER,
       })
       .setOrigin(0.5);
 
     this.add
-      .text(400, 50, "Выберите персонажа", {
-        fontSize: "64px",
-        color: "#ffffff",
+      .text(400, 50, TEXT.SELECT_CHARACTER, {
+        fontSize: STYLE.FONT_SIZE[64],
+        color: STYLE.COLOR.WHITE,
       })
       .setOrigin(0.5);
 

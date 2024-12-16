@@ -1,40 +1,51 @@
 import { Player } from "../entities/player";
-import { SPRITES, PATH_ASSETS, SIZES, TILES, LAYERS } from "../utils/constants";
+import {
+  SPRITES,
+  PATH_ASSETS,
+  SIZES,
+  TILES,
+  LAYERS,
+  KEYS,
+  TEXT,
+  STYLE,
+  GAME_OVER,
+} from "../utils/constants";
 import fallingRocksJSON from "../assets/falling-rocks.json";
+import { SETTINGS } from "../utils/settings";
 
 export class FallingRocksScene extends Phaser.Scene {
   private player?: Player;
   private rocks: Phaser.Physics.Matter.Sprite[] = [];
-  private timer: number = 60;
-  private lives: number = 3;
-  private gameOver: string;
+  private timer: number = SETTINGS.FALLING_ROCKS.TIMER;
+  private lives: number = SETTINGS.FALLING_ROCKS.LIVES;
+  private gameOver: "win" | "loss" | "";
   private timerText: Phaser.GameObjects.Text;
   private livesText: Phaser.GameObjects.Text;
   private restartButton: Phaser.GameObjects.Text;
 
   constructor() {
-    super("FallingRocksScene");
+    super(KEYS.SCENES.FALLING_ROCKS);
   }
 
   preload() {
     this.load.tilemapTiledJSON(
-      "fallingRocksMap",
+      KEYS.MAPS.FALLING_ROCKS,
       PATH_ASSETS + "falling-rocks.json"
     );
     this.load.image(TILES.WINTER, PATH_ASSETS + "winter.png");
-    this.load.image("rock", PATH_ASSETS + `rock.png`);
+    this.load.image(TILES.ROCK, PATH_ASSETS + `rock.png`);
     this.load.spritesheet(
       SPRITES.PLAYER,
       PATH_ASSETS + `characters/${this.registry.get("character")}.png`,
       {
-        frameWidth: SIZES.PLAYER.WIDTH,
-        frameHeight: SIZES.PLAYER.HEIGHT,
+        frameWidth: SIZES.FRAME.WIDTH,
+        frameHeight: SIZES.FRAME.HEIGHT,
       }
     );
   }
 
   create() {
-    const map = this.make.tilemap({ key: "fallingRocksMap" });
+    const map = this.make.tilemap({ key: KEYS.MAPS.FALLING_ROCKS });
     const winter = map.addTilesetImage(
       fallingRocksJSON.tilesets[0].name,
       TILES.WINTER,
@@ -46,16 +57,13 @@ export class FallingRocksScene extends Phaser.Scene {
 
     this.player = new Player(
       this,
-      400,
+      SETTINGS.FALLING_ROCKS.PLAYER.COORDINATES.X,
       map.heightInPixels,
       SPRITES.PLAYER,
-      {
-        left: "A",
-        right: "D",
-      },
-      { width: 32, height: 50 },
-      1.5,
-      2
+      SETTINGS.FALLING_ROCKS.PLAYER.INPUT_CONFIG,
+      SETTINGS.FALLING_ROCKS.PLAYER.BODY_SIZE,
+      SETTINGS.FALLING_ROCKS.PLAYER.MOVE_SPEED,
+      SETTINGS.FALLING_ROCKS.PLAYER.SCALE
     );
     this.cameras.main.startFollow(this.player);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -65,35 +73,35 @@ export class FallingRocksScene extends Phaser.Scene {
       16,
       `Осталось продержаться: ${this.timer} секунд`,
       {
-        fontSize: "32px",
-        color: "#ffffff",
+        fontSize: STYLE.FONT_SIZE[32],
+        color: STYLE.COLOR.WHITE,
       }
     );
 
     this.livesText = this.add.text(16, 50, `Количество жизней: ${this.lives}`, {
-      fontSize: "32px",
-      color: "#ffffff",
+      fontSize: STYLE.FONT_SIZE[32],
+      color: STYLE.COLOR.WHITE,
     });
 
     this.restartButton = this.add
-      .text(400, 400, "Restart", {
-        fontSize: "32px",
-        color: "#ffffff",
-        padding: { x: 10, y: 5 },
-        align: "center",
+      .text(400, 400, TEXT.RESTART, {
+        fontSize: STYLE.FONT_SIZE[32],
+        color: STYLE.COLOR.WHITE,
+        padding: STYLE.PADDING,
+        align: STYLE.ALIGN.CENTER,
       })
       .setOrigin(0.5)
       .setInteractive()
       .setVisible(false);
 
     this.restartButton.on("pointerover", () => {
-      this.restartButton.setStyle({ color: "#fffaaa" });
-      this.input.setDefaultCursor("pointer");
+      this.restartButton.setStyle({ color: STYLE.COLOR.LIGHT_YELLOW });
+      this.input.setDefaultCursor(STYLE.CURSOR.POINTER);
     });
 
     this.restartButton.on("pointerout", () => {
-      this.restartButton.setStyle({ color: "#ffffff" });
-      this.input.setDefaultCursor("default");
+      this.restartButton.setStyle({ color: STYLE.COLOR.WHITE });
+      this.input.setDefaultCursor(STYLE.CURSOR.DEFAULT);
     });
 
     this.restartButton.on("pointerdown", this.restartScene, this);
@@ -107,15 +115,15 @@ export class FallingRocksScene extends Phaser.Scene {
   }
 
   update(_: number, delta: number) {
-    if (this.gameOver === "win") {
+    if (this.gameOver === GAME_OVER.WIN) {
       return this.player.update(delta);
-    } else if (this.gameOver === "loss") {
+    } else if (this.gameOver === GAME_OVER.LOSS) {
       return;
     }
 
     this.player.update(delta);
 
-    if (Math.random() < 0.01) {
+    if (Math.random() < SETTINGS.FALLING_ROCKS.ROCK.PROBABILITY_FALLING) {
       this.spawnRock();
     }
 
@@ -134,16 +142,21 @@ export class FallingRocksScene extends Phaser.Scene {
 
   spawnRock() {
     const rock = this.matter.add
-      .sprite(Phaser.Math.Between(0, this.cameras.main.width), 0, "rock")
-      .setScale(0.1)
-      .setBody({
-        type: "rectangle",
-        width: 50,
-        height: 48,
-      })
+      .sprite(
+        Phaser.Math.Between(0, this.cameras.main.width),
+        SETTINGS.FALLING_ROCKS.ROCK.COORDINATES.Y,
+        TILES.ROCK
+      )
+      .setScale(SETTINGS.FALLING_ROCKS.ROCK.SCALE)
+      .setBody(SETTINGS.FALLING_ROCKS.ROCK.BODY)
       .setFixedRotation()
-      .setFrictionAir(0)
-      .setVelocityY(Phaser.Math.Between(1, 3))
+      .setFrictionAir(SETTINGS.FALLING_ROCKS.ROCK.FRICTION_AIR)
+      .setVelocityY(
+        Phaser.Math.Between(
+          SETTINGS.FALLING_ROCKS.ROCK.MIN_VELOCITY_Y,
+          SETTINGS.FALLING_ROCKS.ROCK.MAX_VELOCITY_Y
+        )
+      )
       .setCollidesWith([]);
 
     this.rocks.push(rock);
@@ -176,14 +189,14 @@ export class FallingRocksScene extends Phaser.Scene {
     this.livesText.setText(`Количество жизней: ${this.lives}`);
 
     if (this.lives <= 0) {
-      this.gameOver = "loss";
-      this.showGameOver("Поражение");
+      this.gameOver = GAME_OVER.LOSS;
+      this.showGameOver(TEXT.LOSS);
     }
   }
 
   win() {
-    this.gameOver = "win";
-    this.showGameOver("Победа");
+    this.gameOver = GAME_OVER.WIN;
+    this.showGameOver(TEXT.WIN);
   }
 
   showGameOver(message: string) {
@@ -193,8 +206,8 @@ export class FallingRocksScene extends Phaser.Scene {
         this.cameras.main.height / 2,
         message,
         {
-          fontSize: "48px",
-          color: "#ffffff",
+          fontSize: STYLE.FONT_SIZE[48],
+          color: STYLE.COLOR.WHITE,
         }
       )
       .setOrigin(0.5);
@@ -203,11 +216,11 @@ export class FallingRocksScene extends Phaser.Scene {
   }
 
   restartScene() {
-    this.lives = 3;
-    this.timer = 60;
+    this.lives = SETTINGS.FALLING_ROCKS.LIVES;
+    this.timer = SETTINGS.FALLING_ROCKS.TIMER;
     this.gameOver = "";
     this.rocks = [];
-    this.input.setDefaultCursor("default");
+    this.input.setDefaultCursor(STYLE.CURSOR.DEFAULT);
     this.scene.restart();
   }
 }

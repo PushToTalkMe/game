@@ -1,4 +1,4 @@
-import { InputController } from "../utils/input.controller";
+import { InputController } from "../controllers/input.controller";
 import { Entity } from "./entity";
 
 export class Player extends Entity {
@@ -13,8 +13,8 @@ export class Player extends Entity {
     texture: string,
     inputConfig: { up?: string; down?: string; left?: string; right?: string },
     bodySize: { width: number; height: number },
-    moveSpeed: number = 0.5,
-    scale: number = 0.8
+    moveSpeed: number,
+    scale: number
   ) {
     super(scene, x, y, texture);
 

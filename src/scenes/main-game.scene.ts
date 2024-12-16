@@ -1,12 +1,22 @@
 import mainJSON from "../assets/main.json";
 import { Player } from "../entities/player";
-import { LAYERS, PATH_ASSETS, SIZES, SPRITES, TILES } from "../utils/constants";
+import {
+  KEYS,
+  LAYERS,
+  PATH_ASSETS,
+  SIZES,
+  SPRITES,
+  STYLE,
+  TEXT,
+  TILES,
+} from "../utils/constants";
+import { SETTINGS } from "../utils/settings";
 
 export class MainGameScene extends Phaser.Scene {
   private player?: Player;
-  isNearTarget: boolean;
-  targetZone: Phaser.GameObjects.Zone;
-  pressText: Phaser.GameObjects.Text;
+  private isNearTarget: boolean;
+  private targetZone: Phaser.GameObjects.Zone;
+  private pressText: Phaser.GameObjects.Text;
 
   handleCollision(
     event: Phaser.Physics.Matter.Events.CollisionActiveEvent,
@@ -28,12 +38,12 @@ export class MainGameScene extends Phaser.Scene {
   }
 
   constructor() {
-    super("MainScene");
+    super(KEYS.SCENES.MAIN);
     this.isNearTarget = false;
   }
 
   preload() {
-    this.load.tilemapTiledJSON("mainMap", PATH_ASSETS + "main.json");
+    this.load.tilemapTiledJSON(KEYS.MAPS.MAIN, PATH_ASSETS + "main.json");
 
     this.load.image(TILES.WINTER, PATH_ASSETS + "winter.png");
     this.load.image(TILES.BALLISTA, PATH_ASSETS + "ballista.png");
@@ -44,14 +54,14 @@ export class MainGameScene extends Phaser.Scene {
       SPRITES.PLAYER,
       PATH_ASSETS + `characters/${this.registry.get("character")}.png`,
       {
-        frameWidth: SIZES.PLAYER.WIDTH,
-        frameHeight: SIZES.PLAYER.HEIGHT,
+        frameWidth: SIZES.FRAME.WIDTH,
+        frameHeight: SIZES.FRAME.HEIGHT,
       }
     );
   }
 
   create() {
-    const map = this.make.tilemap({ key: "mainMap" });
+    const map = this.make.tilemap({ key: KEYS.MAPS.MAIN });
 
     const winter = map.addTilesetImage(
       mainJSON.tilesets[0].name,
@@ -92,16 +102,13 @@ export class MainGameScene extends Phaser.Scene {
 
     this.player = new Player(
       this,
-      200,
-      150,
+      SETTINGS.MAIN.PLAYER.COORDINATES.X,
+      SETTINGS.MAIN.PLAYER.COORDINATES.Y,
       SPRITES.PLAYER,
-      {
-        up: "W",
-        down: "S",
-        left: "A",
-        right: "D",
-      },
-      { width: 32, height: 32 }
+      SETTINGS.MAIN.PLAYER.INPUT_CONFIG,
+      SETTINGS.MAIN.PLAYER.BODY_SIZE,
+      SETTINGS.MAIN.PLAYER.MOVE_SPEED,
+      SETTINGS.MAIN.PLAYER.SCALE
     );
 
     const interactiveObject = wallsLayer.findByIndex(65);
@@ -117,9 +124,9 @@ export class MainGameScene extends Phaser.Scene {
     });
 
     this.pressText = this.add
-      .text(this.player.x, this.player.y - 30, "Press", {
-        fontSize: "16px",
-        color: "#ffffff",
+      .text(this.player.x, this.player.y - 30, TEXT.PRESS, {
+        fontSize: STYLE.FONT_SIZE[16],
+        color: STYLE.COLOR.WHITE,
       })
       .setOrigin(0.5)
       .setVisible(false);
@@ -129,7 +136,7 @@ export class MainGameScene extends Phaser.Scene {
 
     this.input.keyboard.on("keydown-X", () => {
       if (this.isNearTarget) {
-        this.scene.start("FallingRocksScene");
+        this.scene.start(KEYS.SCENES.FALLING_ROCKS);
       }
     });
 
